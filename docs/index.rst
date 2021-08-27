@@ -1,0 +1,5 @@
+=======================
+collective.patchwatcher
+=======================
+
+User documentation
