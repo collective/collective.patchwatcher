@@ -47,11 +47,6 @@ setup(
     python_requires="==2.7",
     install_requires=[
         'setuptools',
-        # -*- Extra requirements: -*-
-        'z3c.jbot',
-        'plone.api>=1.8.4',
-        'plone.restapi',
-        'plone.app.dexterity',
     ],
     extras_require={
         'test': [
@@ -68,6 +63,6 @@ setup(
     [z3c.autoinclude.plugin]
     target = plone
     [console_scripts]
-    update_locale = collective.patchwatcher.locales.update:update_locale
+    patchwatcher = collective.patchwatcher.script:run
     """,
 )

@@ -6,34 +6,58 @@
 collective.patchwatcher
 =======================
 
-Tell me what your product does
+A great companion for keeping track of patched or overridden files.
+
+It requires you to have installed the programs diff and diff3.
 
 Features
 --------
 
-- Can be bullet points
+- declare your overriden files
 
 
 Examples
 --------
 
-This add-on can be seen in action at the following sites:
-- Is there a page on the internet where everybody can see the features?
+Assume your have overridden a file called "querywidget.pt" with jbot, which lives in your own theming package.
+To make this explicit, you have to create a file called "overrides_info.py" which has to offer an importable variable "declarations".
 
+It should contain the following content:
+
+```
+from collective.patchwatcher import DeclarationCollection
+
+declarations = DeclarationCollection("your.theming.addon")
+
+declarations.add(
+    package="archetypes.querywidget",
+    version="1.1.2",
+    path="./skins/querywidget/querywidget.pt",
+    local_path="./overrides/archetypes.querywidget.skins.querywidget.querywidget.pt",
+)
+# ... add more declarations as you wish.
+```
+
+These declarations states, that the overridden file refers to some file from
+another package and has been tested against a specific version.
+
+Then you can call this script to check all these declarations:
+
+./bin/patchwatcher -e "/home/username/zinstance/eggs" -p your.theming.addon
+
+Doing so will check, if the latest version (for example 1.1.4) of
+archetypes.querywidget has changed the overriden file and if yes, it tries to
+apply the changes in your overridden file.
+
+Add "-m" if you want to save the result of the three-way merge. There may be
+conflicts, which then have to be resolved manually.
+You then may update the declaration to 1.1.4 in the "overrides_info.py",
+basically saying that it's also compatible with this new version.
 
 Documentation
 -------------
 
 Full documentation for end users can be found in the "docs" folder, and is also available online at http://docs.plone.org/foo/bar
-
-
-Translations
-------------
-
-This product has been translated into
-
-- Klingon (thanks, K'Plai)
-
 
 Installation
 ------------

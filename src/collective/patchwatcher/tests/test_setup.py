@@ -32,15 +32,6 @@ class TestSetup(unittest.TestCase):
         self.assertTrue(self.installer.isProductInstalled(
             'collective.patchwatcher'))
 
-    def test_browserlayer(self):
-        """Test that ICollectivePatchwatcherLayer is registered."""
-        from collective.patchwatcher.interfaces import (
-            ICollectivePatchwatcherLayer)
-        from plone.browserlayer import utils
-        self.assertIn(
-            ICollectivePatchwatcherLayer,
-            utils.registered_layers())
-
 
 class TestUninstall(unittest.TestCase):
 
@@ -61,12 +52,3 @@ class TestUninstall(unittest.TestCase):
         """Test if collective.patchwatcher is cleanly uninstalled."""
         self.assertFalse(self.installer.isProductInstalled(
             'collective.patchwatcher'))
-
-    def test_browserlayer_removed(self):
-        """Test that ICollectivePatchwatcherLayer is removed."""
-        from collective.patchwatcher.interfaces import \
-            ICollectivePatchwatcherLayer
-        from plone.browserlayer import utils
-        self.assertNotIn(
-            ICollectivePatchwatcherLayer,
-            utils.registered_layers())
