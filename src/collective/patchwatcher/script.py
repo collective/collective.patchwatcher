@@ -30,6 +30,8 @@ def run():
     options = arg_parser.parse_args(sys.argv[1:])
     packages = [package.strip() for package in options.packages.split(",")]
 
+    all_ok = True
+
     for package in packages:
         distribution = get_distribution(package)
         if not distribution:
@@ -45,20 +47,27 @@ def run():
         ok = True
 
         for declaration in declarations:
-            ok &= declaration.check(logger, options.eggs_folder, options.merge)
+            check = declaration.check(logger, options.eggs_folder, options.merge)
+            ok &= check
+            if check:
+                valid_declarations.append(declaration)
 
         if ok:
-            logger.info(
-                "No changes detected or were applied automatically. The declarations for package {} are ready to be updated to version {}".format(
-                    package, distribution.version
+            logger.info("Neither changes nor conflicts detected for all declarations of package {}.".format(package))
+            if options.merge:
+                # Print the chosen versions conveniently
+                print(
+                    "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py from {package}:\n\n{requirements}".format(
+                        requirements="\n".join([declaration.package + "=" + str(declaration.version)]),
+                        package=declaration.local_package
+                    )
                 )
-            )
         else:
-            logger.warn(
-                "The package {} needs further inspection, before it's ready for version {}.".format(
-                    package, distribution.version
-                )
-            )
+            logger.warn("The package {} needs further inspection.".format(package))
+
+        all_ok &= all_ok
+
+    sys.exit(int(all_ok))
 
 
 if __name__ == "__main__":

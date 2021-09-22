@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Init and utils."""
 import glob
+import inspect
 import os
 import pkg_resources
 import subprocess
@@ -125,6 +126,13 @@ class Declaration:
         :rtype: boolean
         """
         if self.is_latest():
+            logger.info(
+                "The patch for {file} in package {package} is already written against for version {version}. Nothing to do.".format(
+                    file=self.path,
+                    package=self.package,
+                    version=str(self.version),
+                )
+            )
             return True
         logger.info(
             "The patch for {file} in package {package} is written for version {version}. Currently installed version is however {current_version}. Checking now for changes...".format(
@@ -148,6 +156,7 @@ class Declaration:
             logger.error(
                 "Did not find version {version} of package {package}".format(version=self.version, package=self.package)
             )
+            return False
 
         # Replace versions in path
         candidate = pkg_resources.resource_filename(self.distribution.project_name, "").replace(
@@ -163,7 +172,6 @@ class Declaration:
             return True
         elif rc == 1:  # changes
             logger.info("Found some changes!")
-            # logger.info(diff_output)
         else:  # process exited with error
             logger.error("Error while performing diff!")
             logger.error(diff_output)
@@ -178,24 +186,30 @@ class Declaration:
             logger.error("Error while merging three-way!")
             logger.error(merge_result)
             return False
+        ret = not bool(rc)
         if rc == 1:
             logger.warn("Conflicts detected! Please fix them on your own!")
-        if merge:
+        if merge and rc in (0, 1):
             with open(self.local_file_path, "wb") as file:
                 file.write(merge_result)
             logger.info("Changes written into {}".format(self.local_file_path))
-        return True
+        else:
+            logger.info("Changes NOT written into {}".format(self.local_file_path))
+        return ret
 
 
 class DeclarationCollection(list):
     """Declarations of overridden files."""
 
-    def __init__(self, local_package):
+    def __init__(self, local_package=""):
         """Initialize declarations
 
-        :param local_package: name of the package, where the overridden files exist
+        :param local_package: name of the package, where the overridden files exist. Automatically determined, if omitted.
         :type local_package: str
         """
+        if not local_package:
+            inspected_stack = inspect.stack()
+            local_package = inspect.getmodule(inspected_stack[1][0]).__package__
         self.local_package = local_package
 
     def add(self, package, version, path, local_path):
