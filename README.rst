@@ -13,21 +13,25 @@ It requires you to have installed the programs diff and diff3.
 Features
 --------
 
-- declare your overriden files
+- provide an easy way to declare your overriden files for your package (including version of the dependencies)
+- automatically check the declarations of a package for version updates of the dependencies
+- automatically merge version updates into your overrides
+- additionally use your declarations to add version pins for the dependencies in the setup.py of your package
 
 
 Examples
 --------
 
-Assume your have overridden a file called "querywidget.pt" with jbot, which lives in your own theming package.
-To make this explicit, you have to create a file called "overrides_info.py" which has to offer an importable variable "declarations".
+Assume you have overridden a file called "querywidget.pt" with jbot in your own package called "my.package" in a folder called "overrides" (the default way to do this).
+The file is orginally provided by archetypes.querywidget and lives in the Folder "skins/querywidget/" of that package. When you createded the override, archetypes.querywidget version 1.1.2 was installed.
+To make this explicit, you have to create a file called "overrides_info.py" inside your package namespace which has to offer an importable variable "declarations".
 
 It should contain the following content:
 
 ```
 from collective.patchwatcher import DeclarationCollection
 
-declarations = DeclarationCollection("your.theming.addon")
+declarations = DeclarationCollection("my.package")
 
 declarations.add(
     package="archetypes.querywidget",
@@ -35,24 +39,22 @@ declarations.add(
     path="./skins/querywidget/querywidget.pt",
     local_path="./overrides/archetypes.querywidget.skins.querywidget.querywidget.pt",
 )
-# ... add more declarations as you wish.
+# add more declarations as you wish
 ```
 
-These declarations states, that the overridden file refers to some file from
-another package and has been tested against a specific version.
+The declaration states the original package, version and relative file path as well as the local path to your override.
 
-Then you can call this script to check all these declarations:
+Now you can call the patchwatcher script to check your declarations for your package:
 
-./bin/patchwatcher -e "/home/username/zinstance/eggs" -p your.theming.addon
+./bin/patchwatcher -e "/home/username/zinstance/eggs" -p my.package
 
-Doing so will check, if the latest version (for example 1.1.4) of
-archetypes.querywidget has changed the overriden file and if yes, it tries to
-apply the changes in your overridden file.
+Patchwatcher needs the path to your eggs directory to find the latest version (in our example version 1.1.4) of
+archetypes.querywidget. It will look for changes between both orginal files in versions 1.1.2 and 1.1.4.
+If it finds changes, it will try to apply the changes to your overridden file using a three-way-merge.
 
-Add "-m" if you want to save the result of the three-way merge. There may be
-conflicts, which then have to be resolved manually.
-You then may update the declaration to 1.1.4 in the "overrides_info.py",
-basically saying that it's also compatible with this new version.
+Add the "-m" option to the script invocation if you want to save the result of the three-way merge.
+The result will then be written back into the override file. There may be conflicts, which then have to be resolved manually.
+After the merge operation, you will have to update your declaration to 1.1.4 in the "overrides_info.py" file.
 
 Documentation
 -------------
@@ -86,8 +88,7 @@ Contribute
 Support
 -------
 
-If you are having issues, please let us know.
-We have a mailing list located at: project@example.com
+If you are having issues, please let us know via the github issue tracker or contact one of the contributors.
 
 
 License
