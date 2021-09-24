@@ -49,9 +49,6 @@ def run():
         for declaration in declarations:
             check = declaration.check(logger, options.eggs_folder, options.merge)
             ok &= check
-            if check:
-                valid_declarations.append(declaration)
-
         if ok:
             logger.info("Neither changes nor conflicts detected for all declarations of package {}.".format(package))
             if options.merge:
