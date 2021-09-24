@@ -104,7 +104,7 @@ class Declaration:
             rc = 2
         return merge_result, rc
 
-    def check(self, logger, egg_folder, merge):
+    def check(self, logger, egg_folder, write):
         """This method checks three files:
 
         1) the old vanilla file (found in the eggs folder)
@@ -120,8 +120,8 @@ class Declaration:
         :type logger: object
         :param egg_folder: location of the egg folder
         :type egg_folder: str
-        :param merge: True if the merge result should be written (with conflicts or not)
-        :type merge: boolean
+        :param write: True if the merge result should be written (with conflicts or not)
+        :type write: boolean
         :return: True, if no changes are found or changes are merged without any conflict.
         :rtype: boolean
         """
@@ -189,7 +189,7 @@ class Declaration:
         ret = not bool(rc)
         if rc == 1:
             logger.warn("Conflicts detected! Please fix them on your own!")
-        if merge and rc in (0, 1):
+        if write and rc in (0, 1):
             with open(self.local_file_path, "wb") as file:
                 file.write(merge_result)
             logger.info("Changes written into {}".format(self.local_file_path))

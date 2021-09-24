@@ -21,14 +21,20 @@ def get_distribution(package_name):
     except pkg_resources.DistributionNotFound:
         return
 
+def is_development_package(package):
+    return '/src' in package.location
 
 def run():
     arg_parser = argparse.ArgumentParser(description="script for checking if there are changes")
-    arg_parser.add_argument("-p", "--packages", required=True, help="packages list")
+    arg_parser.add_argument("-p", "--packages", required=False, help="packages list")
     arg_parser.add_argument("-e", "--eggs-folder", required=True, help="eggs folder for looking up sources")
-    arg_parser.add_argument("-m", "--merge", help="apply the three-way merge", action="store_true")
+    arg_parser.add_argument("-w", "--write", help="write the three-way merge", action="store_true")
     options = arg_parser.parse_args(sys.argv[1:])
-    packages = [package.strip() for package in options.packages.split(",")]
+
+    if options.packages:
+        packages = [package.strip() for package in options.packages.split(",")]
+    else:
+        packages = [package.project_name for package in pkg_resources.working_set if is_development_package(package)]
 
     all_ok = True
 
@@ -47,23 +53,23 @@ def run():
         ok = True
 
         for declaration in declarations:
-            check = declaration.check(logger, options.eggs_folder, options.merge)
+            check = declaration.check(logger, options.eggs_folder, options.write)
             ok &= check
         if ok:
-            if options.merge:
+            if options.write:
                 logger.info("No conflicts detected for all declarations of package {}.".format(package))
-                # Print the chosen versions conveniently
-                print(
-                    "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py from {package}:\n\n{requirements}".format(
-                        requirements="\n".join([declaration.package + "=" + str(declaration.version)]),
-                        package=declaration.local_package
-                    )
-                )
             else:
                 logger.info("No conflicts detected for all declarations of package {}. You may use -m for merging, when there were changes.".format(package))
-
         else:
             logger.warn("The package {} needs further inspection.".format(package))
+        if options.write:
+            # Print the chosen versions conveniently
+            print(
+                "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py from {package}:\n\n{requirements}".format(
+                    requirements="\n".join([declaration.package + "=" + str(declaration.version)]),
+                    package=declaration.local_package
+                )
+            )
 
         all_ok &= all_ok
 
