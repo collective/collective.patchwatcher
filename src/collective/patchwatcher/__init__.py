@@ -135,7 +135,7 @@ class Declaration:
             )
             return True
         logger.info(
-            "The patch for {file} in package {package} is written for version {version}. Currently installed version is however {current_version}. Checking now for changes...".format(
+            "The patch for {file} in package {package} is written for version {version}. Currently installed version is {current_version}. Checking now for changes...".format(
                 file=self.path,
                 package=self.package,
                 version=str(self.version),

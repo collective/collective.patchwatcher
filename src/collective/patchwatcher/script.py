@@ -50,8 +50,8 @@ def run():
             check = declaration.check(logger, options.eggs_folder, options.merge)
             ok &= check
         if ok:
-            logger.info("Neither changes nor conflicts detected for all declarations of package {}.".format(package))
             if options.merge:
+                logger.info("No conflicts detected for all declarations of package {}.".format(package))
                 # Print the chosen versions conveniently
                 print(
                     "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py from {package}:\n\n{requirements}".format(
@@ -59,6 +59,9 @@ def run():
                         package=declaration.local_package
                     )
                 )
+            else:
+                logger.info("No conflicts detected for all declarations of package {}. You may use -m for merging, when there were changes.".format(package))
+
         else:
             logger.warn("The package {} needs further inspection.".format(package))
 
