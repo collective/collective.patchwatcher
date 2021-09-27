@@ -192,7 +192,10 @@ class Declaration:
         if write and rc in (0, 1):
             with open(self.local_file_path, "wb") as file:
                 file.write(merge_result)
-            logger.info("Changes written into {}".format(self.local_file_path))
+            if rc == 1:
+                logger.info("Changes (with conflicts) written into {}".format(self.local_file_path))
+            else:
+                logger.info("Changes written into {}".format(self.local_file_path))
         else:
             logger.info("Changes NOT written into {}".format(self.local_file_path))
         return ret
