@@ -31,7 +31,7 @@ It should contain the following content:
 ```
 from collective.patchwatcher import DeclarationCollection
 
-declarations = DeclarationCollection("my.package")
+declarations = DeclarationCollection()
 
 declarations.add(
     package="archetypes.querywidget",
@@ -44,7 +44,8 @@ declarations.add(
 
 The declaration states the original package, version and relative file path as well as the local path to your override.
 
-Now you can call the patchwatcher script to check your declarations for your package:
+Now you can call the patchwatcher script to check your declarations for your package
+after you potentially updated its dependency packages (e.g. by updating your Plone version):
 
 ./bin/patchwatcher -e "/home/username/zinstance/eggs" -p my.package
 
