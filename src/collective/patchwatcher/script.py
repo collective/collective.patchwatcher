@@ -46,7 +46,7 @@ def run():
         try:
             override_info = import_module(".overrides_info", package)
             declarations = getattr(override_info, "declarations")
-        except ImportError, AttributeError:
+        except (ImportError, AttributeError):
             logger.debug("Could not import {}.overrides_info.declarations".format(package))
             continue
 
