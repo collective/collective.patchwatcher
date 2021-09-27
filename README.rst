@@ -80,9 +80,11 @@ and then running ``bin/buildout``
 TODO
 --------
 
+- Make -e optional and use the settings from buildout as default for the eggs folder
+- Allow multiple eggs folders (e.g. from installations of different plone major versions) making -e an extension to the default
 - Add a more comfortable way to include z3c.jbot overrides (.e.g. putting multiple override container paths into DeclarationList)
-- the final statement per package (use -w if there were changes) could be different depending on the existence of changes (would need to track the changes though)
-- add a convenience parameter that creates a declarations output of suggested declarations (could be depending on override container paths)
+- Adjust the final statement per package (use -w if there were changes) to accomodate for the existence of changes (would need to track the changes though)
+- Add a convenience parameter that creates a declarations output of suggested declarations (could be depending on override container paths)
 
 Contribute
 ----------
