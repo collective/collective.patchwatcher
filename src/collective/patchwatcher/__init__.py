@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 """Init and utils."""
 import glob
+import inspect
 import os
 import pkg_resources
 import subprocess
+
+
+try:
+    FileNotFoundError
+except NameError: # py2 compatibility
+    FileNotFoundError = IOError
 
 
 class Declaration:
@@ -31,11 +38,17 @@ class Declaration:
         self.local_package = local_package
         self.distribution = pkg_resources.get_distribution(package)
 
-        self.current_file_path = os.path.normpath(pkg_resources.resource_filename(self.distribution.project_name, path))
-        self.local_file_path = os.path.normpath(pkg_resources.resource_filename(local_package, local_path))
+        self.current_file_path = os.path.normpath(
+            pkg_resources.resource_filename(self.distribution.project_name, path)
+        )
+        self.local_file_path = os.path.normpath(
+            pkg_resources.resource_filename(local_package, local_path)
+        )
 
         if not pkg_resources.resource_exists(self.distribution.project_name, path):
-            raise FileExistsError("File to be overridden is not found: {}".format(self.current_file_path))
+            raise FileNotFoundError(
+                "File to be overridden is not found: {}".format(self.current_file_path)
+            )
 
     def is_latest(self):
         """Checks if the latest version is reached.
@@ -103,12 +116,12 @@ class Declaration:
             rc = 2
         return merge_result, rc
 
-    def check(self, logger, egg_folder, merge):
+    def check(self, logger, eggs_folder, write):
         """This method checks three files:
 
         1) the old vanilla file (found in the eggs folder)
         2) the latest vanilla file (found in the eggs folder)
-        3) the overridden file which is written against 1)
+        3) the override file which was overriden against 1)
 
         After detecting, if there happened any changes between 1) and 2),
         there will be an attempt for a three-way merge.
@@ -117,17 +130,24 @@ class Declaration:
 
         :param logger: logger
         :type logger: object
-        :param egg_folder: location of the egg folder
-        :type egg_folder: str
-        :param merge: True if the merge result should be written (with conflicts or not)
-        :type merge: boolean
-        :return: True, if no changes are found or changes are merged without any conflict.
+        :param eggs_folder: location of the eggs folder
+        :type eggs_folder: str
+        :param write: True if the merge result should be written to the override file (even with conflicts)
+        :type write: boolean
+        :return: True, if no changes were found or changes were merged without any conflict.
         :rtype: boolean
         """
         if self.is_latest():
+            logger.info(
+                "The override {file} in package {package} is already based on version {version}. Nothing to do.".format(
+                    file=self.path,
+                    package=self.package,
+                    version=str(self.version),
+                )
+            )
             return True
         logger.info(
-            "The patch for {file} in package {package} is written for version {version}. Currently installed version is however {current_version}. Checking now for changes...".format(
+            "The override {file} in package {package} is based on version {version}. Currently installed version is {current_version}. Checking for changes.".format(
                 file=self.path,
                 package=self.package,
                 version=str(self.version),
@@ -136,7 +156,9 @@ class Declaration:
         )
         # Look out for old original version
         # egg folder
-        glob_candidates = "{egg_folder}/{package}*".format(egg_folder=egg_folder, package=self.package)
+        glob_candidates = "{eggs_folder}/{package}*".format(
+            eggs_folder=eggs_folder, package=self.package
+        )
 
         # Search for previous versions in eggs
         for candidate in glob.glob(glob_candidates):
@@ -146,31 +168,37 @@ class Declaration:
                 break
         else:
             logger.error(
-                "Did not find version {version} of package {package}".format(version=self.version, package=self.package)
+                "Did not find version {version} of package {package}".format(
+                    version=self.version, package=self.package
+                )
             )
+            return False
 
         # Replace versions in path
-        candidate = pkg_resources.resource_filename(self.distribution.project_name, "").replace(
-            str(self.distribution.parsed_version), str(self.version)
-        )
+        candidate = pkg_resources.resource_filename(
+            self.distribution.project_name, ""
+        ).replace(str(self.distribution.parsed_version), str(self.version))
         previous_file_path = os.path.normpath(os.path.join(candidate, self.path))
 
         # check if there are changed between the original versions
-        diff_output, rc = self.get_diff(path_original=previous_file_path, path_changed=self.current_file_path)
+        diff_output, rc = self.get_diff(
+            path_original=previous_file_path, path_changed=self.current_file_path
+        )
 
         if rc == 0:  # no changes
             logger.info("No changes found. Nothing to do!")
             return True
         elif rc == 1:  # changes
             logger.info("Found some changes!")
-            # logger.info(diff_output)
         else:  # process exited with error
             logger.error("Error while performing diff!")
             logger.error(diff_output)
             return False
 
         merge_result, rc = self.merge_three_way(
-            myfile=self.local_file_path, oldfile=previous_file_path, yourfile=self.current_file_path
+            myfile=self.local_file_path,
+            oldfile=previous_file_path,
+            yourfile=self.current_file_path,
         )
         if rc == 0:  # no changes
             logger.info("Three-way merge was successful!")
@@ -178,24 +206,37 @@ class Declaration:
             logger.error("Error while merging three-way!")
             logger.error(merge_result)
             return False
+        ret = not bool(rc)
         if rc == 1:
             logger.warn("Conflicts detected! Please fix them on your own!")
-        if merge:
+        if write and rc in (0, 1):
             with open(self.local_file_path, "wb") as file:
                 file.write(merge_result)
-            logger.info("Changes written into {}".format(self.local_file_path))
-        return True
+            if rc == 1:
+                logger.info(
+                    "Changes (with conflicts) written into {}".format(
+                        self.local_file_path
+                    )
+                )
+            else:
+                logger.info("Changes written into {}".format(self.local_file_path))
+        else:
+            logger.info("Changes NOT written into {}".format(self.local_file_path))
+        return ret
 
 
 class DeclarationCollection(list):
     """Declarations of overridden files."""
 
-    def __init__(self, local_package):
+    def __init__(self, local_package=""):
         """Initialize declarations
 
-        :param local_package: name of the package, where the overridden files exist
+        :param local_package: name of the package, where the overridden files exist. Automatically determined, if omitted.
         :type local_package: str
         """
+        if not local_package:
+            inspected_stack = inspect.stack()
+            local_package = inspect.getmodule(inspected_stack[1][0]).__package__
         self.local_package = local_package
 
     def add(self, package, version, path, local_path):
@@ -214,6 +255,10 @@ class DeclarationCollection(list):
         """
         self.append(
             Declaration(
-                package=package, version=version, path=path, local_package=self.local_package, local_path=local_path
+                package=package,
+                version=version,
+                path=path,
+                local_package=self.local_package,
+                local_path=local_path,
             )
         )

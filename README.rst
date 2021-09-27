@@ -31,7 +31,7 @@ It should contain the following content:
 ```
 from collective.patchwatcher import DeclarationCollection
 
-declarations = DeclarationCollection("my.package")
+declarations = DeclarationCollection()
 
 declarations.add(
     package="archetypes.querywidget",
@@ -44,7 +44,8 @@ declarations.add(
 
 The declaration states the original package, version and relative file path as well as the local path to your override.
 
-Now you can call the patchwatcher script to check your declarations for your package:
+Now you can call the patchwatcher script to check your declarations for your package
+after you potentially updated its dependency packages (e.g. by updating your Plone version):
 
 ./bin/patchwatcher -e "/home/username/zinstance/eggs" -p my.package
 
@@ -76,6 +77,14 @@ Install collective.patchwatcher by adding it to your buildout::
 
 and then running ``bin/buildout``
 
+TODO
+--------
+
+- Make -e optional and use the settings from buildout as default for the eggs folder
+- Allow multiple eggs folders (e.g. from installations of different plone major versions) making -e an extension to the default
+- Add a more comfortable way to include z3c.jbot overrides (.e.g. putting multiple override container paths into DeclarationList)
+- Adjust the final statement per package (use -w if there were changes) to accomodate for the existence of changes (would need to track the changes though)
+- Add a convenience parameter that creates a declarations output of suggested declarations (could be depending on override container paths)
 
 Contribute
 ----------
