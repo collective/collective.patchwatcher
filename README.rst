@@ -77,6 +77,10 @@ Install collective.patchwatcher by adding it to your buildout::
 
 and then running ``bin/buildout``
 
+TODO
+--------
+
+- Add a more comfortable way to include z3c.jbot overrides.
 
 Contribute
 ----------
