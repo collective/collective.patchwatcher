@@ -80,7 +80,9 @@ and then running ``bin/buildout``
 TODO
 --------
 
-- Add a more comfortable way to include z3c.jbot overrides.
+- Add a more comfortable way to include z3c.jbot overrides (.e.g. putting multiple override container paths into DeclarationList)
+- the final statement per package (use -w if there were changes) could be different depending on the existence of changes (would need to track the changes though)
+- add a convenience parameter that creates a declarations output of suggested declarations (could be depending on override container paths)
 
 Contribute
 ----------
