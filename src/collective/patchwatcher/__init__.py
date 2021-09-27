@@ -110,12 +110,12 @@ class Declaration:
             rc = 2
         return merge_result, rc
 
-    def check(self, logger, egg_folder, write):
+    def check(self, logger, eggs_folder, write):
         """This method checks three files:
 
         1) the old vanilla file (found in the eggs folder)
         2) the latest vanilla file (found in the eggs folder)
-        3) the overridden file which is written against 1)
+        3) the override file which was overriden against 1)
 
         After detecting, if there happened any changes between 1) and 2),
         there will be an attempt for a three-way merge.
@@ -124,16 +124,16 @@ class Declaration:
 
         :param logger: logger
         :type logger: object
-        :param egg_folder: location of the egg folder
-        :type egg_folder: str
-        :param write: True if the merge result should be written (with conflicts or not)
+        :param eggs_folder: location of the eggs folder
+        :type eggs_folder: str
+        :param write: True if the merge result should be written to the override file (even with conflicts)
         :type write: boolean
-        :return: True, if no changes are found or changes are merged without any conflict.
+        :return: True, if no changes were found or changes were merged without any conflict.
         :rtype: boolean
         """
         if self.is_latest():
             logger.info(
-                "The patch for {file} in package {package} is already written against for version {version}. Nothing to do.".format(
+                "The override {file} in package {package} is already based on version {version}. Nothing to do.".format(
                     file=self.path,
                     package=self.package,
                     version=str(self.version),
@@ -141,7 +141,7 @@ class Declaration:
             )
             return True
         logger.info(
-            "The patch for {file} in package {package} is written for version {version}. Currently installed version is {current_version}. Checking now for changes...".format(
+            "The override {file} in package {package} is based on version {version}. Currently installed version is {current_version}. Checking for changes.".format(
                 file=self.path,
                 package=self.package,
                 version=str(self.version),
@@ -150,8 +150,8 @@ class Declaration:
         )
         # Look out for old original version
         # egg folder
-        glob_candidates = "{egg_folder}/{package}*".format(
-            egg_folder=egg_folder, package=self.package
+        glob_candidates = "{eggs_folder}/{package}*".format(
+            eggs_folder=eggs_folder, package=self.package
         )
 
         # Search for previous versions in eggs
