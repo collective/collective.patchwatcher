@@ -66,10 +66,10 @@ def run():
         if options.write:
             # Print the chosen versions conveniently
             print(
-                "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py and overrides_info.py from {package}:\n\n{requirements}".format(
+                "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py and the declarations in overrides_info.py of {package}:\n{requirements}".format(
                     requirements="\n".join([declaration.package + "=" + str(declaration.distribution.version)]),
                     package=declaration.local_package
-                )
+                ) + "\n" + "-" * 120
             )
 
         all_ok &= all_ok
