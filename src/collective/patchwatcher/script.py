@@ -21,21 +21,38 @@ def get_distribution(package_name):
     except pkg_resources.DistributionNotFound:
         return
 
+
 def is_development_package(package):
-    return '/src' in package.location
+    return "/src" in package.location
+
 
 def run():
-    arg_parser = argparse.ArgumentParser(description="script for checking if there are changes")
-    arg_parser.add_argument("-p", "--packages", required=False, help="packages list, defaults to development packages")
-    arg_parser.add_argument("-e", "--eggs-folder", required=True, help="eggs folder for looking up sources")
-    arg_parser.add_argument("-w", "--write", help="write the three-way merge", action="store_true")
+    arg_parser = argparse.ArgumentParser(
+        description="script for checking if there are changes"
+    )
+    arg_parser.add_argument(
+        "-p",
+        "--packages",
+        required=False,
+        help="packages list, defaults to development packages",
+    )
+    arg_parser.add_argument(
+        "-e", "--eggs-folder", required=True, help="eggs folder for looking up sources"
+    )
+    arg_parser.add_argument(
+        "-w", "--write", help="write the three-way merge", action="store_true"
+    )
     options = arg_parser.parse_args(sys.argv[1:])
 
     if options.packages:
         packages = [package.strip() for package in options.packages.split(",")]
     else:
         logger.info("No packages given. Using all development packages as default.")
-        packages = [package.project_name for package in pkg_resources.working_set if is_development_package(package)]
+        packages = [
+            package.project_name
+            for package in pkg_resources.working_set
+            if is_development_package(package)
+        ]
 
     all_ok = True
 
@@ -48,7 +65,9 @@ def run():
             override_info = import_module(".overrides_info", package)
             declarations = getattr(override_info, "declarations")
         except (ImportError, AttributeError):
-            logger.debug("Could not import {}.overrides_info.declarations".format(package))
+            logger.debug(
+                "Could not import {}.overrides_info.declarations".format(package)
+            )
             continue
 
         ok = True
@@ -58,18 +77,35 @@ def run():
             ok &= check
         if ok:
             if options.write:
-                logger.info("No conflicts detected for all declarations of package {}.".format(package))
+                logger.info(
+                    "No conflicts detected for all declarations of package {}.".format(
+                        package
+                    )
+                )
             else:
-                logger.info("No conflicts detected for all declarations of package {}. You may use -w for writing back the merge result, if changes were detected.".format(package))
+                logger.info(
+                    "No conflicts detected for all declarations of package {}. You may use -w for writing back the merge result, if changes were detected.".format(
+                        package
+                    )
+                )
         else:
             logger.warn("The package {} needs further inspection.".format(package))
-        if options.write:
+        if options.write or True:
             # Print the chosen versions conveniently
             print(
-                "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py and the declarations in overrides_info.py of {package}:\n{requirements}".format(
-                    requirements="\n".join([declaration.package + "=" + str(declaration.distribution.version)]),
-                    package=declaration.local_package
-                ) + "\n" + "-" * 120
+                "-" * 120
+                + '\nYou may add the following constraints to "install_requires" parameter in setup.py and the declarations in overrides_info.py of {package}:\n{requirements}'.format(
+                    requirements="\n".join(
+                        [
+                            declaration.package
+                            + "="
+                            + str(declaration.distribution.version)
+                        ]
+                    ),
+                    package=declaration.local_package,
+                )
+                + "\n"
+                + "-" * 120
             )
 
         all_ok &= all_ok

@@ -32,11 +32,17 @@ class Declaration:
         self.local_package = local_package
         self.distribution = pkg_resources.get_distribution(package)
 
-        self.current_file_path = os.path.normpath(pkg_resources.resource_filename(self.distribution.project_name, path))
-        self.local_file_path = os.path.normpath(pkg_resources.resource_filename(local_package, local_path))
+        self.current_file_path = os.path.normpath(
+            pkg_resources.resource_filename(self.distribution.project_name, path)
+        )
+        self.local_file_path = os.path.normpath(
+            pkg_resources.resource_filename(local_package, local_path)
+        )
 
         if not pkg_resources.resource_exists(self.distribution.project_name, path):
-            raise FileExistsError("File to be overridden is not found: {}".format(self.current_file_path))
+            raise FileExistsError(
+                "File to be overridden is not found: {}".format(self.current_file_path)
+            )
 
     def is_latest(self):
         """Checks if the latest version is reached.
@@ -144,7 +150,9 @@ class Declaration:
         )
         # Look out for old original version
         # egg folder
-        glob_candidates = "{egg_folder}/{package}*".format(egg_folder=egg_folder, package=self.package)
+        glob_candidates = "{egg_folder}/{package}*".format(
+            egg_folder=egg_folder, package=self.package
+        )
 
         # Search for previous versions in eggs
         for candidate in glob.glob(glob_candidates):
@@ -154,18 +162,22 @@ class Declaration:
                 break
         else:
             logger.error(
-                "Did not find version {version} of package {package}".format(version=self.version, package=self.package)
+                "Did not find version {version} of package {package}".format(
+                    version=self.version, package=self.package
+                )
             )
             return False
 
         # Replace versions in path
-        candidate = pkg_resources.resource_filename(self.distribution.project_name, "").replace(
-            str(self.distribution.parsed_version), str(self.version)
-        )
+        candidate = pkg_resources.resource_filename(
+            self.distribution.project_name, ""
+        ).replace(str(self.distribution.parsed_version), str(self.version))
         previous_file_path = os.path.normpath(os.path.join(candidate, self.path))
 
         # check if there are changed between the original versions
-        diff_output, rc = self.get_diff(path_original=previous_file_path, path_changed=self.current_file_path)
+        diff_output, rc = self.get_diff(
+            path_original=previous_file_path, path_changed=self.current_file_path
+        )
 
         if rc == 0:  # no changes
             logger.info("No changes found. Nothing to do!")
@@ -178,7 +190,9 @@ class Declaration:
             return False
 
         merge_result, rc = self.merge_three_way(
-            myfile=self.local_file_path, oldfile=previous_file_path, yourfile=self.current_file_path
+            myfile=self.local_file_path,
+            oldfile=previous_file_path,
+            yourfile=self.current_file_path,
         )
         if rc == 0:  # no changes
             logger.info("Three-way merge was successful!")
@@ -193,7 +207,11 @@ class Declaration:
             with open(self.local_file_path, "wb") as file:
                 file.write(merge_result)
             if rc == 1:
-                logger.info("Changes (with conflicts) written into {}".format(self.local_file_path))
+                logger.info(
+                    "Changes (with conflicts) written into {}".format(
+                        self.local_file_path
+                    )
+                )
             else:
                 logger.info("Changes written into {}".format(self.local_file_path))
         else:
@@ -231,6 +249,10 @@ class DeclarationCollection(list):
         """
         self.append(
             Declaration(
-                package=package, version=version, path=path, local_package=self.local_package, local_path=local_path
+                package=package,
+                version=version,
+                path=path,
+                local_package=self.local_package,
+                local_path=local_path,
             )
         )
