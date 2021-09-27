@@ -7,6 +7,12 @@ import pkg_resources
 import subprocess
 
 
+try:
+    FileNotFoundError
+except NameError: # py2 compatibility
+    FileNotFoundError = IOError
+
+
 class Declaration:
     """Declaration of an overridden file."""
 
@@ -40,7 +46,7 @@ class Declaration:
         )
 
         if not pkg_resources.resource_exists(self.distribution.project_name, path):
-            raise FileExistsError(
+            raise FileNotFoundError(
                 "File to be overridden is not found: {}".format(self.current_file_path)
             )
 

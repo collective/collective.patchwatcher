@@ -23,7 +23,7 @@ def get_distribution(package_name):
 
 
 def is_development_package(package):
-    return "/src" in package.location
+    return "/src/" in package.location
 
 
 def run():
