@@ -60,7 +60,7 @@ def run():
             if options.write:
                 logger.info("No conflicts detected for all declarations of package {}.".format(package))
             else:
-                logger.info("No conflicts detected for all declarations of package {}. You may use -m for merging, when there were changes.".format(package))
+                logger.info("No conflicts detected for all declarations of package {}. You may use -w for writing back the merge result, if changes were detected.".format(package))
         else:
             logger.warn("The package {} needs further inspection.".format(package))
         if options.write:
