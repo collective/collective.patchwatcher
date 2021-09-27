@@ -26,7 +26,7 @@ def is_development_package(package):
 
 def run():
     arg_parser = argparse.ArgumentParser(description="script for checking if there are changes")
-    arg_parser.add_argument("-p", "--packages", required=False, help="packages list")
+    arg_parser.add_argument("-p", "--packages", required=False, help="packages list, defaults to development packages")
     arg_parser.add_argument("-e", "--eggs-folder", required=True, help="eggs folder for looking up sources")
     arg_parser.add_argument("-w", "--write", help="write the three-way merge", action="store_true")
     options = arg_parser.parse_args(sys.argv[1:])
@@ -34,6 +34,7 @@ def run():
     if options.packages:
         packages = [package.strip() for package in options.packages.split(",")]
     else:
+        logger.info("No packages given. Using all development packages as default.")
         packages = [package.project_name for package in pkg_resources.working_set if is_development_package(package)]
 
     all_ok = True
