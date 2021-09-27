@@ -67,7 +67,7 @@ def run():
             # Print the chosen versions conveniently
             print(
                 "-" * 120 + "\nYou may add the following constraints to \"install_requires\" parameter in setup.py and overrides_info.py from {package}:\n\n{requirements}".format(
-                    requirements="\n".join([declaration.package + "=" + str(declaration.version)]),
+                    requirements="\n".join([declaration.package + "=" + str(declaration.distribution.version)]),
                     package=declaration.local_package
                 )
             )
