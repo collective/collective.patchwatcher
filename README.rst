@@ -23,7 +23,7 @@ Examples
 --------
 
 Assume you have overridden a file called "querywidget.pt" with jbot in your own package called "my.package" in a folder called "overrides" (the default way to do this).
-The file is orginally provided by archetypes.querywidget and lives in the Folder "skins/querywidget/" of that package. When you createded the override, archetypes.querywidget version 1.1.2 was installed.
+The file is orginally provided by archetypes.querywidget and lives in the Folder "skins/querywidget/" of that package. When you created the override, archetypes.querywidget version 1.1.2 was installed.
 To make this explicit, you have to create a file called "overrides_info.py" inside your package namespace which has to offer an importable variable "declarations".
 
 It should contain the following content:
@@ -53,7 +53,7 @@ Patchwatcher needs the path to your eggs directory to find the latest version (i
 archetypes.querywidget. It will look for changes between both orginal files in versions 1.1.2 and 1.1.4.
 If it finds changes, it will try to apply the changes to your overridden file using a three-way-merge.
 
-Add the "-m" option to the script invocation if you want to save the result of the three-way merge.
+Add the "-w" option to the script invocation if you want to save the result of the three-way merge.
 The result will then be written back into the override file. There may be conflicts, which then have to be resolved manually.
 After the merge operation, you will have to update your declaration to 1.1.4 in the "overrides_info.py" file.
 
@@ -71,16 +71,25 @@ Install collective.patchwatcher by adding it to your buildout::
 
     ...
 
+    parts +=
+        patchwatcher
+
+    [patchwatcher]
     eggs =
         collective.patchwatcher
+        ${instance:eggs}
+    recipe = zc.recipe.egg
+    initialization =
+            import sys
+            sys.argv[1:1] = "-e ${buildout:eggs-directory}".split()
+    scripts = patchwatcher
 
 
-and then running ``bin/buildout``
+and then running ``bin/buildout``. After that the script ``bin/patchwatcher`` is conveniently pre-configured with the buildout's eggs path.
 
 TODO
 --------
 
-- Make -e optional and use the settings from buildout as default for the eggs folder
 - Allow multiple eggs folders (e.g. from installations of different plone major versions) making -e an extension to the default
 - Add a more comfortable way to include z3c.jbot overrides (.e.g. putting multiple override container paths into DeclarationList)
 - Adjust the final statement per package (use -w if there were changes) to accomodate for the existence of changes (would need to track the changes though)
