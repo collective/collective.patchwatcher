@@ -162,7 +162,8 @@ class Declaration:
 
         # Search for previous versions in eggs
         for candidate in glob.glob(glob_candidates):
-            tokens = candidate.split("-")
+            basename = os.path.basename(candidate)
+            tokens = basename.split("-")
             _name, version = tokens[0], tokens[1]
             if version == str(self.version):
                 break
