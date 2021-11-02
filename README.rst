@@ -91,6 +91,8 @@ Command-line options
 
 The command line options are the following:
 
+::
+
     usage: patchwatcher [-h] [-p PACKAGES] -e EGGS_FOLDER [-w] [-dcc] [-doc]
 
     script for checking if there are changes
