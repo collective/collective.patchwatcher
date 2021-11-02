@@ -28,26 +28,28 @@ To make this explicit, you have to create a file called "overrides_info.py" insi
 
 It should contain the following content:
 
-```
-from collective.patchwatcher import DeclarationCollection
+.. code-block:: python
 
-declarations = DeclarationCollection()
+    from collective.patchwatcher import DeclarationCollection
 
-declarations.add(
-    package="archetypes.querywidget",
-    version="1.1.2",
-    path="./skins/querywidget/querywidget.pt",
-    local_path="./overrides/archetypes.querywidget.skins.querywidget.querywidget.pt",
-)
-# add more declarations as you wish
-```
+    declarations = DeclarationCollection()
+
+    declarations.add(
+        package="archetypes.querywidget",
+        version="1.1.2",
+        path="./skins/querywidget/querywidget.pt",
+        local_path="./overrides/archetypes.querywidget.skins.querywidget.querywidget.pt",
+    )
+    # add more declarations as you wish
 
 The declaration states the original package, version and relative file path as well as the local path to your override.
 
 Now you can call the patchwatcher script to check your declarations for your package
 after you potentially updated its dependency packages (e.g. by updating your Plone version):
 
-./bin/patchwatcher -e "/home/username/zinstance/eggs" -p my.package
+.. code-block:: console
+
+    ./bin/patchwatcher -e "/home/username/zinstance/eggs" -p my.package
 
 Patchwatcher needs the path to your eggs directory to find the latest version (in our example version 1.1.4) of
 archetypes.querywidget. It will look for changes between both orginal files in versions 1.1.2 and 1.1.4.
