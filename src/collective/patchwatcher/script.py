@@ -11,8 +11,9 @@ import pkg_resources
 import sys
 
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format="%(message)s")
 logger = logging.getLogger("collective.patchwatcher")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 def get_distribution(package_name):
@@ -42,8 +43,25 @@ def run():
     arg_parser.add_argument(
         "-w", "--write", help="write the three-way merge", action="store_true"
     )
+    arg_parser.add_argument(
+        "-dcc",
+        "--diff-customized-current",
+        help="show the difference in the files between your customized and the current version",
+        action="store_true",
+    )
+    arg_parser.add_argument(
+        "-doc",
+        "--diff-old-current",
+        help="show the difference in the files between old version and the current version (needs both to be present in eggs folder)",
+        action="store_true",
+    )
     options = arg_parser.parse_args(sys.argv[1:])
 
+    diff_options = {
+        k.replace("diff_", ""): v
+        for (k, v) in vars(options).items()
+        if k.startswith("diff_")
+    }
     if options.packages:
         packages = [package.strip() for package in options.packages.split(",")]
     else:
@@ -73,7 +91,9 @@ def run():
         ok = True
 
         for declaration in declarations:
-            check = declaration.check(logger, options.eggs_folder, options.write)
+            check = declaration.check(
+                logger, options.eggs_folder, options.write, diff_options
+            )
             ok &= check
         if ok:
             if options.write:

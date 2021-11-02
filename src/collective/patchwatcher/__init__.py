@@ -9,7 +9,7 @@ import subprocess
 
 try:
     FileNotFoundError
-except NameError: # py2 compatibility
+except NameError:  # py2 compatibility
     FileNotFoundError = IOError
 
 
@@ -58,13 +58,15 @@ class Declaration:
         """
         return self.distribution.parsed_version == self.version
 
-    def get_diff(self, path_original, path_changed):
+    def get_diff(self, path_original, path_changed, colorful=False):
         """Perform a diff between two files. This is done by calling `diff`.
 
         :param path_original: path of original file
         :type path_original: str
         :param path_changed: path of changed file
         :type path_changed: str
+        :param colorful: colorful output
+        :type colorful: boolean
         :return: tuple of diff's output and return code
         :rtype: tuple
         """
@@ -75,7 +77,7 @@ class Declaration:
             p = subprocess.Popen(
                 [
                     "diff",
-                    "-p",
+                    "--color=always" if colorful else "" "-p",
                     path_original,
                     path_changed,
                 ],
@@ -84,6 +86,7 @@ class Declaration:
                 stderr=subprocess.PIPE,
             )
             diff_output, _err = p.communicate()
+            diff_output = diff_output.decode("utf8")
             rc = p.returncode
         except Exception as e:
             diff_output = repr(e)
@@ -110,13 +113,14 @@ class Declaration:
                 stderr=subprocess.PIPE,
             )
             merge_result, _err = p.communicate()
+            merge_result = merge_result.decode("utf8")
             rc = p.returncode
         except Exception as e:
             merge_result = repr(e)
             rc = 2
         return merge_result, rc
 
-    def check(self, logger, eggs_folder, write):
+    def check(self, logger, eggs_folder, write, diff_options=None):
         """This method checks three files:
 
         1) the old vanilla file (found in the eggs folder)
@@ -134,9 +138,27 @@ class Declaration:
         :type eggs_folder: str
         :param write: True if the merge result should be written to the override file (even with conflicts)
         :type write: boolean
+        :param diff_options: some options to show diffs for inspection reasons
+        :type diff_options: dict
         :return: True, if no changes were found or changes were merged without any conflict.
         :rtype: boolean
         """
+        diff_options = diff_options or {}
+
+        if diff_options.get("customized_current"):
+            diff_output, rc = self.get_diff(
+                path_original=self.current_file_path,
+                path_changed=self.local_file_path,
+                colorful=True,
+            )
+            logger.info(
+                "Result of performing diff between:\n* overridden file: {local_file}\n* original file: {current_file}\n\n {diff_output}".format(
+                    local_file=self.local_file_path,
+                    current_file=self.current_file_path,
+                    diff_output=diff_output,
+                )
+            )
+
         if self.is_latest():
             logger.info(
                 "The override {file} in package {package} is already based on version {version}. Nothing to do.".format(
@@ -183,7 +205,9 @@ class Declaration:
 
         # check if there are changed between the original versions
         diff_output, rc = self.get_diff(
-            path_original=previous_file_path, path_changed=self.current_file_path
+            path_original=previous_file_path,
+            path_changed=self.current_file_path,
+            colorful=True,
         )
 
         if rc == 0:  # no changes
@@ -191,6 +215,14 @@ class Declaration:
             return True
         elif rc == 1:  # changes
             logger.info("Found some changes!")
+            if diff_options.get("old_current"):
+                logger.info(
+                    "Result of performing diff between:\n* old file: {previous_file_path}\n* current file: {current_file}\n\n {diff_output}".format(
+                        previous_file_path=previous_file_path,
+                        current_file=self.current_file_path,
+                        diff_output=diff_output,
+                    )
+                )
         else:  # process exited with error
             logger.error("Error while performing diff!")
             logger.error(diff_output)
