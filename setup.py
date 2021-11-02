@@ -23,7 +23,7 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
-        "Software Development :: Quality Assurance",
+        "Topic :: Software Development :: Quality Assurance",
         "Framework :: Plone",
         "Framework :: Plone :: Addon",
         "Framework :: Plone :: 4.3",
