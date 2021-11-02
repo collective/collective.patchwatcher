@@ -55,7 +55,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    python_requires="==2.7",
+    python_requires=">=2.7",
     install_requires=[
         "setuptools",
     ],
