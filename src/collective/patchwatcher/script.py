@@ -24,6 +24,7 @@ def get_distribution(package_name):
 
 
 def is_development_package(package):
+    # XXX: There is probably a saner way to determine development packages
     return "/src/" in package.location
 
 
@@ -35,7 +36,7 @@ def run():
         "-p",
         "--packages",
         required=False,
-        help="packages list, defaults to development packages",
+        help="packages list separated by commata, defaults to development packages",
     )
     arg_parser.add_argument(
         "-e", "--eggs-folder", required=True, help="eggs folder for looking up sources"

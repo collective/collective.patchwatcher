@@ -53,7 +53,9 @@ after you potentially updated its dependency packages (e.g. by updating your Plo
 
 Patchwatcher needs the path to your eggs directory to find the latest version (in our example version 1.1.4) of
 archetypes.querywidget. It will look for changes between both orginal files in versions 1.1.2 and 1.1.4.
-If it finds changes, it will try to apply the changes to your overridden file using a three-way-merge.
+Note, that this is only possible if both versions are present in the eggs directory.
+This is usually the case, when you just updated your version pins and freshly ran buildout.
+If patchwatcher finds changes, it will try to apply the changes to your overridden file using a three-way-merge.
 
 Add the "-w" option to the script invocation if you want to save the result of the three-way merge.
 The result will then be written back into the override file. There may be conflicts, which then have to be resolved manually.
@@ -83,6 +85,34 @@ Install collective.patchwatcher by adding it to your buildout::
 
 
 and then running ``bin/buildout``. After that the script ``bin/patchwatcher`` is conveniently pre-configured with the buildout's eggs path.
+
+Command-line options
+--------------------
+
+The command line options are the following:
+
+    usage: patchwatcher [-h] [-p PACKAGES] -e EGGS_FOLDER [-w] [-dcc] [-doc]
+
+    script for checking if there are changes
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -p PACKAGES, --packages PACKAGES
+                            packages list separated by commata, defaults to
+                            development packages
+    -e EGGS_FOLDER, --eggs-folder EGGS_FOLDER
+                            eggs folder for looking up sources
+    -w, --write           write the three-way merge
+    -dcc, --diff-customized-current
+                            show the difference in the files between your
+                            customized and the current version
+    -doc, --diff-old-current
+                            show the difference in the files between old version
+                            and the current version (needs both to be present in
+                            eggs folder)
+
+Before running patchwatcher, please ensure you have the relevant versions of the overridden packages present in your eggs folder.
+Otherwise patchwatcher will complain, that it is unable to detect or apply changes.
 
 TODO
 --------
