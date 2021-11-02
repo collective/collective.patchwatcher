@@ -59,11 +59,6 @@ Add the "-w" option to the script invocation if you want to save the result of t
 The result will then be written back into the override file. There may be conflicts, which then have to be resolved manually.
 After the merge operation, you will have to update your declaration to 1.1.4 in the "overrides_info.py" file.
 
-Documentation
--------------
-
-Full documentation for end users can be found in the "docs" folder, and is also available online at http://docs.plone.org/foo/bar
-
 Installation
 ------------
 
@@ -102,7 +97,6 @@ Contribute
 
 - Issue Tracker: https://github.com/collective/collective.patchwatcher/issues
 - Source Code: https://github.com/collective/collective.patchwatcher
-- Documentation: https://docs.plone.org/foo/bar
 
 
 Support
