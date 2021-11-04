@@ -152,7 +152,7 @@ class Declaration:
                 colorful=True,
             )
             logger.info(
-                "Result of performing diff between:\n* overridden file: {local_file}\n* original file: {current_file}\n\n {diff_output}".format(
+                u"Result of performing diff between:\n* overridden file: {local_file}\n* original file: {current_file}\n\n {diff_output}".format(
                     local_file=self.local_file_path,
                     current_file=self.current_file_path,
                     diff_output=diff_output,
@@ -217,7 +217,7 @@ class Declaration:
             logger.info("Found some changes!")
             if diff_options.get("old_current"):
                 logger.info(
-                    "Result of performing diff between:\n* old file: {previous_file_path}\n* current file: {current_file}\n\n {diff_output}".format(
+                    u"Result of performing diff between:\n* old file: {previous_file_path}\n* current file: {current_file}\n\n {diff_output}".format(
                         previous_file_path=previous_file_path,
                         current_file=self.current_file_path,
                         diff_output=diff_output,
