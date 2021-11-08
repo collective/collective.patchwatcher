@@ -123,6 +123,7 @@ TODO
 - Add a more comfortable way to include z3c.jbot overrides (.e.g. putting multiple override container paths into DeclarationList)
 - Adjust the final statement per package (use -w if there were changes) to accomodate for the existence of changes (would need to track the changes though)
 - Add a convenience parameter that creates a declarations output of suggested declarations (could be depending on override container paths)
+- Group declarations by their packages (may be a breaking change)
 
 Contribute
 ----------

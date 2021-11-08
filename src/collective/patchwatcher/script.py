@@ -112,18 +112,19 @@ def run():
         else:
             logger.warn("The package {} needs further inspection.".format(package))
         if options.write or True:
+            summary_packages = sorted(set([(declaration.package, str(declaration.distribution.version)) for declaration in declarations]))
             # Print the chosen versions conveniently
             print(
                 "-" * 120
-                + '\nYou may add the following constraints to "install_requires" parameter in setup.py and the declarations in overrides_info.py of {package}:\n{requirements}'.format(
+                + '\nYou may add the following constraints to "install_requires" parameter in setup.py and the declarations in overrides_info.py of your packages:\n{requirements}'.format(
                     requirements="\n".join(
                         [
-                            declaration.package
+                            package
                             + "="
-                            + str(declaration.distribution.version)
+                            + version
+                            for (package, version) in summary_packages
                         ]
                     ),
-                    package=declaration.local_package,
                 )
                 + "\n"
                 + "-" * 120
